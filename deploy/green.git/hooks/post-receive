@@ -1,8 +1,8 @@
 #!/bin/bash
 
-docker pull localhost:5000/main-app:latest
+docker pull localhost:5000/app:latest
 docker stop app-green
 docker rm app-green
-docker rmi localhost:5000/main-app:current
-docker tag localhost:5000/main-app:latest localhost:5000/main-app:current
-docker run -p 3002:8080 -d --name app-green localhost:5000/main-app:latest
+docker rmi localhost:5000/app:current
+docker tag localhost:5000/app:latest localhost:5000/app:current
+docker run -p 3002:8080 -d --name app-green localhost:5000/app:latest

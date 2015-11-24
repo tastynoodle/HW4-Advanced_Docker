@@ -1,10 +1,14 @@
-FROM ubuntu:14.04
+FROM    centos:centos6
 
-RUN apt-get update
-RUN apt-get -y install git
-RUN apt-get -y install nodejs
-RUN apt-get -y install npm
+# Enable EPEL for Node.js
+RUN     rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+# Install Node.js and npm
+RUN     yum install -y npm
+
+# Bundle app source
 COPY ./App /src
+# Install app dependencies
 RUN cd /src; npm install
-EXPOSE 8080
-CMD ["nodejs", "/src/main.js", "8080"]
+
+EXPOSE  8080
+CMD ["node", "/src/main.js", "8080"]

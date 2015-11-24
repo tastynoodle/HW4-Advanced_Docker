@@ -64,4 +64,60 @@ client:
 
 #### Docker Deploy
 
-In this part I build three dockers for app, green and blue.
+The structure of this project is:
+
+* deploy/
+	* App/
+	* blue.git/
+	* green.git/
+	* Dockerfile
+
+I built three dockers for app, green and blue. Their dockerfiles are the same. For convenience I used the codes of Deployment Workshop.
+
+```
+FROM    centos:centos6
+
+# Enable EPEL for Node.js
+RUN     rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+# Install Node.js and npm
+RUN     yum install -y npm
+
+# Bundle app source
+COPY ./App /src
+# Install app dependencies
+RUN cd /src; npm install
+
+EXPOSE  8080
+CMD ["node", "/src/main.js", "8080"]
+```
+
+To finish the task three hosts are added. One is the `post-commit` hook of main project.
+
+```
+#!/bin/bash
+
+cd Deploy
+docker build -t app .
+docker stop app
+docker rm app
+docker run -p 3000:8080 -d --name app hw4-app
+docker tag -f app localhost:5000/app:latest
+docker push localhost:5000/app:latest
+```
+
+When do a `git commit`, the project will be rebuilt and pushed to the registery.
+
+Another two hooks are `post-receive` hook of green and blue projects. Below is the hook for green project.
+
+```
+#!/bin/bash
+
+docker pull localhost:5000/hw4-app:latest
+docker stop app-green
+docker rm app-green
+docker rmi localhost:5000/app:current
+docker tag localhost:5000/app:latest localhost:5000/app:current
+docker run -p 3001:8080 -d --name app-green localhost:5000/app:latest
+```
+
+This hook makes sure the slices are updated on time.
